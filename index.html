@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ATシールメーカー</title>
+  <link rel="stylesheet" href="./styles.css?v=19">
+</head>
+<body>
+  <main class="app">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">Amazon thumbnail tool</p>
+        <h1>ATシールメーカー</h1>
+      </div>
+      <div class="top-actions">
+        <input id="projectName" class="name-input" value="新規ATシール" aria-label="編集データ名">
+        <button id="undoBtn">戻る</button>
+        <button id="redoBtn">進む</button>
+        <button id="saveNewBtn">新規保存</button>
+        <button id="overwriteBtn">上書き</button>
+        <button id="exportDataBtn">PNG書き出し</button>
+      </div>
+    </header>
+
+    <nav class="mode-tabs" aria-label="画面切り替え">
+      <button class="active" data-tab="editor" type="button">シールデータ編集</button>
+      <button data-tab="placement" type="button">商品画像に配置</button>
+    </nav>
+
+    <section id="editorTabPanel" class="workspace editor-workspace tab-panel active">
+      <aside class="panel controls text-input-panel" aria-label="入力パネル">
+        <div class="control-group">
+          <h2>テンプレート</h2>
+          <label>ブランド<select id="brandSelect"></select></label>
+          <div class="segmented template-buttons" id="templateButtons"></div>
+        </div>
+
+        <div class="control-group">
+          <h2>文言入力</h2>
+          <div id="layerList" class="layer-list"></div>
+          <button id="addTextBtn" class="full" type="button">文字を追加</button>
+        </div>
+
+        <div class="control-group">
+          <h2>素材追加</h2>
+          <button id="addMedalBtn" class="full">メダルを追加</button>
+          <button id="addBubbleBtn" class="full" type="button">吹き出しを追加</button>
+          <p class="hint">今後ここに素材を追加できます。</p>
+        </div>
+      </aside>
+
+      <section class="preview-panel">
+        <div class="section-title">
+          <div>
+            <p class="eyebrow">Sticker editor</p>
+            <h2>シール編集</h2>
+          </div>
+          <button id="commitStickerBtn" class="primary">編集完了</button>
+        </div>
+        <div class="sticker-stage">
+          <div id="stickerMount" class="sticker-mount" aria-label="シールプレビュー"></div>
+        </div>
+      </section>
+
+      <aside class="side-stack">
+        <section class="panel saved-panel">
+          <h2>保存データ</h2>
+          <div id="savedList" class="saved-list"></div>
+          <label class="file-button full">外部編集データを読み込み<input id="importDataInput" type="file" accept="application/json"></label>
+          <button id="deleteProjectBtn" class="danger full">選択データを削除</button>
+        </section>
+
+        <section class="panel controls edit-panel" aria-label="文字編集パネル">
+          <h2>文字編集</h2>
+          <label>文章<textarea id="textContent" rows="4"></textarea></label>
+          <div id="selectionPreview" class="selection-preview">選択文字なし</div>
+          <div class="two-col">
+            <label>フォント<select id="fontFamily"></select></label>
+            <label>色<input id="textColor" type="color"></label>
+          </div>
+          <button id="alignCenterBtn" class="full" type="button">真ん中寄せ</button>
+          <div class="character-tools">
+            <p class="hint">文章欄で一部の文字を選択すると、その文字だけに反映されます。</p>
+            <div class="two-col">
+              <label>選択文字サイズ<input id="charFontSize" type="number" min="6" max="140"></label>
+              <label>選択文字色<input id="charColor" type="color"></label>
+            </div>
+          </div>
+          <div class="two-col">
+            <label>サイズ<input id="fontSize" type="number" min="8" max="120"></label>
+            <label>太さ<select id="fontWeight">
+              <option value="400">標準</option>
+              <option value="600">中太</option>
+              <option value="700">太字</option>
+              <option value="900">極太</option>
+            </select></label>
+          </div>
+          <div class="two-col">
+            <label>行間<input id="lineHeight" type="number" min="0.8" max="2.2" step="0.05"></label>
+            <label>文字間<input id="letterSpacing" type="number" min="-4" max="12" step="0.5"></label>
+          </div>
+          <div class="two-col">
+            <label>X位置<input id="textX" type="range" min="0" max="100"></label>
+            <label>Y位置<input id="textY" type="range" min="0" max="100"></label>
+          </div>
+          <label id="elementSizeControl">素材サイズ<input id="elementSize" type="range" min="20" max="900"></label>
+          <div id="bubbleControls" class="two-col">
+            <label>吹き出し色<input id="bubbleFillColor" type="color" value="#f5f3de"></label>
+            <label>吹き出し口<select id="bubbleTailSide">
+              <option value="bottom-left">下側・左向き</option>
+              <option value="bottom-right">下側・右向き</option>
+            </select></label>
+          </div>
+          <button id="deleteSelectedBtn" class="danger full" type="button">選択素材を削除</button>
+          <label>組み方向<select id="textDirection">
+            <option value="horizontal">横書き</option>
+            <option value="vertical">縦書き</option>
+          </select></label>
+          <div class="toggle-grid">
+            <label><input id="textShadow" type="checkbox"> ドロップシャドウ</label>
+            <label><input id="textGlow" type="checkbox"> 光彩</label>
+          </div>
+        </section>
+      </aside>
+    </section>
+
+    <section id="placementTabPanel" class="canvas-area tab-panel">
+      <div class="section-title">
+        <div>
+          <p class="eyebrow">Thumbnail canvas</p>
+          <h2>商品画像に配置</h2>
+        </div>
+        <div class="top-actions">
+          <button id="applyStickerBtn">シールデータを反映</button>
+          <label class="file-button">商品画像<input id="productInput" type="file" accept="image/*"></label>
+          <button id="downloadJpgBtn" class="primary">JPG保存</button>
+        </div>
+      </div>
+
+      <div class="canvas-tools">
+        <label class="range-line">商品サイズ<input id="productScale" type="range" min="20" max="220" value="100"></label>
+        <label class="range-line">シールサイズ<input id="stickerScale" type="range" min="20" max="220" value="100"></label>
+        <label class="range-line">影の大きさ<input id="shadowBlur" type="range" min="0" max="60" value="24"></label>
+        <label class="range-line">影の濃さ<input id="shadowOpacity" type="range" min="0" max="80" value="28"></label>
+      </div>
+
+      <div id="productCanvas" class="product-canvas">
+        <div class="empty-state">商品画像を読み込むと、シールの下に商品が表示されます</div>
+        <img id="productImage" alt="">
+        <div id="placedSticker" aria-label="配置済みシール"></div>
+      </div>
+    </section>
+  </main>
+
+  <script src="./asset-data.js?v=1"></script>
+  <script src="./app.js?v=28"></script>
+</body>
+</html>
