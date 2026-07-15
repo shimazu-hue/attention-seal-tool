@@ -479,6 +479,7 @@ function styleAt(layer, index, fittedSize) {
 }
 
 function fittedFontSize(layer, lines) {
+  if (layer.fitText === false) return layer.fontSize;
   if (!layer.box) return layer.fontSize;
   const minSize = 6;
   const maxSize = layer.fontSize;
@@ -542,6 +543,7 @@ function createMedal() {
     direction: "horizontal",
     align: "center",
     vAlign: "middle",
+    fitText: false,
     charStyles: {},
     shadow: false,
     glow: false
@@ -576,6 +578,7 @@ function createMedal2() {
     direction: "horizontal",
     align: "center",
     vAlign: "middle",
+    fitText: false,
     charStyles: Object.fromEntries([
       ...Array.from({ length: 10 }, (_, index) => [index, { fontSize: headlineSize }]),
       ...Array.from({ length: 17 }, (_, index) => [19 + index, { fontSize: noteSize }])
@@ -1181,6 +1184,9 @@ function renderLayers() {
         toggleIds.forEach((id) => {
           state.layerVisibility[id] = event.target.checked;
         });
+        if (toggleIds.includes("note")) {
+          state.showNotes = event.target.checked;
+        }
         renderAll();
         commitStickerToCanvas();
       });
@@ -1396,7 +1402,7 @@ function normalizeLoadedState() {
   if (!state.elements) state.elements = [];
   if (typeof state.showNotes !== "boolean") state.showNotes = true;
   if (!state.layerVisibility) state.layerVisibility = {};
-  if (state.showNotes === false) state.layerVisibility.note = false;
+  if (state.showNotes === false && state.layerVisibility.note === undefined) state.layerVisibility.note = false;
   state.showNotes = state.layerVisibility.note !== false;
   const qplusDefaults = state.brand === "QPLUS" ? new Map((currentTemplate().layers || []).map((layer) => [layer.id, layer])) : null;
   state.layers.forEach((layer) => {
@@ -1432,7 +1438,7 @@ function normalizeLoadedState() {
       (layer.box?.x === 100 && layer.box?.y === 70 && layer.box?.width === 72)
     )) {
       layer.box = { x: 100, y: 120, width: 72, height: 340 };
-      layer.fontSize = Math.min(layer.fontSize, 17);
+      layer.fontSize = layer.fontSize || 17;
       layer.vAlign = "top";
       layer.clip = false;
     }
@@ -1459,6 +1465,9 @@ function normalizeLoadedState() {
     }
     if (layer.kind === "medal2" && !layer.textBox) {
       layer.textBox = defaultMedal2TextBox(layer);
+    }
+    if (layer.kind === "medal" || layer.kind === "medal2") {
+      layer.fitText = false;
     }
     if (layer.kind === "medal" && state.brand === "QPLUS") {
       const size = defaultMedalSize(currentTemplate());
