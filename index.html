@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>ATシールメーカー</title>
-  <link rel="stylesheet" href="./styles.css?v=23">
+  <link rel="stylesheet" href="./styles.css?v=24">
 </head>
 <body>
   <main class="app">
@@ -71,8 +71,11 @@
       <aside class="side-stack">
         <section class="panel saved-panel">
           <h2>保存データ</h2>
+          <label class="saved-sort">並び替え<select id="savedSortSelect">
+            <option value="newest">制作新しい順</option>
+            <option value="name">名前順</option>
+          </select></label>
           <div id="savedList" class="saved-list"></div>
-          <label class="file-button full">外部編集データを読み込み<input id="importDataInput" type="file" accept="application/json"></label>
           <button id="deleteProjectBtn" class="danger full">選択データを削除</button>
         </section>
 
@@ -161,6 +164,6 @@
   </main>
 
   <script src="./asset-data.js?v=6"></script>
-  <script src="./app.js?v=55"></script>
+  <script src="./app.js?v=56"></script>
 </body>
 </html>

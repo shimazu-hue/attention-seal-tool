@@ -2,6 +2,7 @@ const $ = (id) => document.getElementById(id);
 
 const STORE_KEY = "attentionSealTemplateProjects.v1";
 const EXPORT_COUNT_KEY = "attentionSealExportCount.v1";
+const SAVED_SORT_KEY = "attentionSealSavedSort.v1";
 const EDITOR_CANVAS_PADDING = 90;
 const EDITOR_STAGE_SIZE = 720;
 const MEDAL_IMAGE = "./assets/medal-base.png";
@@ -238,6 +239,7 @@ let productDragState = null;
 let textDragState = null;
 let activeTab = "editor";
 let exportCount = Number(localStorage.getItem(EXPORT_COUNT_KEY) || 0);
+let savedSortMode = localStorage.getItem(SAVED_SORT_KEY) || "newest";
 
 let state = {
   name: "新規ATシール",
@@ -1256,7 +1258,14 @@ function updateRangeLimits() {
 }
 
 function renderSavedList() {
-  const projects = readProjects();
+  const projects = readProjects().slice().sort((a, b) => {
+    if (savedSortMode === "name") {
+      return String(a.name || "").localeCompare(String(b.name || ""), "ja", { numeric: true });
+    }
+    return new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0);
+  });
+  const sortSelect = $("savedSortSelect");
+  if (sortSelect) sortSelect.value = savedSortMode;
   $("savedList").innerHTML = "";
   if (!projects.length) {
     const empty = document.createElement("p");
@@ -1780,27 +1789,6 @@ async function exportData() {
   }
 }
 
-function importData(file) {
-  const reader = new FileReader();
-  reader.onload = () => {
-    try {
-      const nextState = JSON.parse(reader.result);
-      if (!nextState.layers || !nextState.brand || !nextState.template) throw new Error("invalid");
-      state = nextState;
-      normalizeLoadedState();
-      selectedBrand = state.brand;
-      selectedTemplate = state.template;
-      selectedProjectId = "";
-      selectedLayerId = state.layers[0]?.id || "";
-      renderAll();
-      commitStickerToCanvas();
-    } catch {
-      alert("読み込めない編集データです。");
-    }
-  };
-  reader.readAsText(file);
-}
-
 function loadProduct(file) {
   const reader = new FileReader();
   reader.onload = () => {
@@ -1873,7 +1861,11 @@ function bindEvents() {
   $("overwriteBtn").addEventListener("click", () => saveProject(false));
   $("deleteProjectBtn").addEventListener("click", deleteProject);
   $("exportDataBtn").addEventListener("click", exportData);
-  $("importDataInput").addEventListener("change", (event) => event.target.files[0] && importData(event.target.files[0]));
+  $("savedSortSelect").addEventListener("change", (event) => {
+    savedSortMode = event.target.value;
+    localStorage.setItem(SAVED_SORT_KEY, savedSortMode);
+    renderSavedList();
+  });
   $("commitStickerBtn").addEventListener("click", commitStickerToCanvas);
   $("applyStickerBtn").addEventListener("click", commitStickerToCanvas);
   $("productInput").addEventListener("change", (event) => event.target.files[0] && loadProduct(event.target.files[0]));

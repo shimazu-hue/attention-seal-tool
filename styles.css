@@ -522,6 +522,14 @@ input[type="range"] {
   overflow: auto;
 }
 
+.saved-sort {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 10px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
 .canvas-area {
   padding: 16px;
 }
