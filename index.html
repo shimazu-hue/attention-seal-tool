@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>ATシールメーカー</title>
-  <link rel="stylesheet" href="./styles.css?v=19">
+  <link rel="stylesheet" href="./styles.css?v=23">
 </head>
 <body>
   <main class="app">
@@ -14,6 +14,7 @@
         <h1>ATシールメーカー</h1>
       </div>
       <div class="top-actions">
+        <div class="export-counter">制作数 <strong id="exportCount">0</strong></div>
         <input id="projectName" class="name-input" value="新規ATシール" aria-label="編集データ名">
         <button id="undoBtn">戻る</button>
         <button id="redoBtn">進む</button>
@@ -45,7 +46,11 @@
         <div class="control-group">
           <h2>素材追加</h2>
           <button id="addMedalBtn" class="full">メダルを追加</button>
+          <button id="addMedal2Btn" class="full" type="button">メダル2を追加</button>
           <button id="addBubbleBtn" class="full" type="button">吹き出しを追加</button>
+          <button id="addOrFragranceBtn" class="full" type="button">香り素材 OR</button>
+          <button id="addQuFragranceBtn" class="full" type="button">香り素材 Q+</button>
+          <button id="addMintMaterialBtn" class="full" type="button">ミント素材</button>
           <p class="hint">今後ここに素材を追加できます。</p>
         </div>
       </aside>
@@ -112,7 +117,7 @@
               <option value="bottom-right">下側・右向き</option>
             </select></label>
           </div>
-          <button id="deleteSelectedBtn" class="danger full" type="button">選択素材を削除</button>
+          <button id="deleteSelectedBtn" class="danger full" type="button">選択項目を削除</button>
           <label>組み方向<select id="textDirection">
             <option value="horizontal">横書き</option>
             <option value="vertical">縦書き</option>
@@ -138,22 +143,24 @@
         </div>
       </div>
 
-      <div class="canvas-tools">
-        <label class="range-line">商品サイズ<input id="productScale" type="range" min="20" max="220" value="100"></label>
-        <label class="range-line">シールサイズ<input id="stickerScale" type="range" min="20" max="220" value="100"></label>
-        <label class="range-line">影の大きさ<input id="shadowBlur" type="range" min="0" max="60" value="24"></label>
-        <label class="range-line">影の濃さ<input id="shadowOpacity" type="range" min="0" max="80" value="28"></label>
-      </div>
+      <div class="placement-layout">
+        <div class="canvas-tools">
+          <label class="range-line">商品サイズ<input id="productScale" type="range" min="20" max="220" value="100"></label>
+          <label class="range-line">シールサイズ<input id="stickerScale" type="range" min="20" max="220" value="100"></label>
+          <label class="range-line">影の大きさ<input id="shadowBlur" type="range" min="0" max="60" value="24"></label>
+          <label class="range-line">影の濃さ<input id="shadowOpacity" type="range" min="0" max="80" value="28"></label>
+        </div>
 
-      <div id="productCanvas" class="product-canvas">
-        <div class="empty-state">商品画像を読み込むと、シールの下に商品が表示されます</div>
-        <img id="productImage" alt="">
-        <div id="placedSticker" aria-label="配置済みシール"></div>
+        <div id="productCanvas" class="product-canvas">
+          <div class="empty-state">商品画像を読み込むと、シールの下に商品が表示されます</div>
+          <img id="productImage" alt="">
+          <div id="placedSticker" aria-label="配置済みシール"></div>
+        </div>
       </div>
     </section>
   </main>
 
-  <script src="./asset-data.js?v=1"></script>
-  <script src="./app.js?v=28"></script>
+  <script src="./asset-data.js?v=6"></script>
+  <script src="./app.js?v=53"></script>
 </body>
 </html>

@@ -1,9 +1,16 @@
 const $ = (id) => document.getElementById(id);
 
 const STORE_KEY = "attentionSealTemplateProjects.v1";
+const EXPORT_COUNT_KEY = "attentionSealExportCount.v1";
 const EDITOR_CANVAS_PADDING = 90;
 const EDITOR_STAGE_SIZE = 720;
 const MEDAL_IMAGE = "./assets/medal-base.png";
+const MEDAL2_IMAGE = "./assets/medal-2-base.png";
+const FRAGRANCE_MATERIALS = {
+  or: { label: "香り素材 OR", image: "./assets/or-fragrance-material.png", width: 218, height: 148 },
+  qu: { label: "香り素材 Q+", image: "./assets/qu-fragrance-material.png", width: 218, height: 148 },
+  mint: { label: "ミント素材", image: "./assets/mint-material.png", width: 218, height: 148 }
+};
 const THUMBNAIL_WIDTH = 1125;
 const THUMBNAIL_HEIGHT = 1500;
 
@@ -77,11 +84,143 @@ const brandGroups = {
   },
   WHITH_WHITE: {
     label: "WHITH WHITE",
-    templates: {}
+    templates: {
+      horizontal1: {
+        label: "横型1",
+        image: "./assets/wh-horizontal-1-base.png?v=1",
+        width: 747,
+        height: 473,
+        canvasScale: 26,
+        layers: [
+          textLayer("rank", "訴求2 訴求2 訴求2 訴求2", 374, 61, 34, "#ffffff", 700, "horizontal", { label: "訴求2", box: [110, 32, 527, 58], align: "center", vAlign: "middle" }),
+          textLayer("main", "口臭ケア", 374, 160, 108, "#ffffff", 700, "horizontal", { label: "訴求1", box: [78, 84, 590, 142], align: "center", vAlign: "middle" }),
+          textLayer("band", "サボンの香り", 374, 306, 60, "#285893", 700, "horizontal", { label: "訴求3", box: [118, 258, 510, 88], align: "center", vAlign: "middle" }),
+          textLayer("note", "*1 古い角質や汚れによる *2マスキングによる", 374, 356, 13, "#231f20", 500, "horizontal", { label: "注釈", box: [235, 342, 277, 25], align: "center", vAlign: "middle" })
+        ]
+      },
+      horizontal2: {
+        label: "横型2",
+        image: "./assets/wh-horizontal-2-base.png?v=1",
+        width: 554,
+        height: 298,
+        canvasScale: 32,
+        layers: [
+          textLayer("main", "ダメージ補修 特化", 277, 139, 42, "#347fc6", 700, "horizontal", { label: "訴求1", box: [22, 104, 510, 72], align: "center", vAlign: "middle" }),
+          textLayer("rank", "シリーズ累計販売個数", 277, 77, 23, "#231f20", 700, "horizontal", { label: "訴求2", box: [88, 58, 378, 42], align: "center", vAlign: "middle" }),
+          textLayer("band", "サボンの香り", 277, 248, 28, "#ffffff", 700, "horizontal", { label: "訴求3", box: [44, 232, 466, 42], align: "center", vAlign: "middle" }),
+          textLayer("note", "*1 古い角質や汚れによる　*2マスキングによる", 277, 280, 8, "#ffffff", 600, "horizontal", { label: "注釈", box: [48, 270, 458, 18], align: "center", vAlign: "middle" })
+        ]
+      },
+      round1: {
+        label: "丸型1",
+        image: "./assets/wh-round-1-base.png?v=1",
+        width: 300,
+        height: 295,
+        canvasScale: 46,
+        layers: [
+          textLayer("rank", "訴求2訴求2訴求2", 150, 51, 18, "#231f20", 700, "horizontal", { label: "訴求2", box: [54, 34, 192, 34], align: "center", vAlign: "middle" }),
+          textLayer("main", "ダメージ\n補修特化", 150, 125, 39, "#347fc6", 700, "horizontal", { label: "訴求1", box: [44, 72, 212, 92], align: "center", vAlign: "middle" }),
+          textLayer("band", "サボンの香り", 150, 219, 23, "#ffffff", 700, "horizontal", { label: "訴求3", box: [40, 198, 220, 42], align: "center", vAlign: "middle" }),
+          textLayer("note", "*1 古い角質や汚れによる\n*2マスキングによる", 150, 257, 8, "#ffffff", 600, "horizontal", { label: "注釈", box: [75, 244, 150, 30], align: "center", vAlign: "middle" })
+        ]
+      },
+      vertical: {
+        label: "縦型",
+        image: "./assets/wh-vertical-base.png?v=1",
+        width: 179,
+        height: 530,
+        canvasScale: 20,
+        layers: [
+          textLayer("rank", "訴求2訴求\n2訴求2", 90, 38, 18, "#231f20", 700, "horizontal", { label: "訴求2", box: [20, 16, 139, 55], align: "center", vAlign: "middle" }),
+          textLayer("main", "ダメージ\n補修特化", 88, 248, 42, "#347fc6", 700, "vertical", { label: "訴求1", box: [20, 100, 139, 290], align: "center", vAlign: "middle", clip: false }),
+          textLayer("band", "サボンの香り", 90, 442, 24, "#ffffff", 700, "horizontal", { label: "訴求3", box: [15, 420, 149, 45], align: "center", vAlign: "middle" }),
+          textLayer("note", "*1 古い角質や汚れによる\n*2マスキングによる", 90, 486, 7, "#ffffff", 600, "horizontal", { label: "注釈", box: [24, 468, 131, 32], align: "center", vAlign: "middle" })
+        ]
+      }
+    }
   },
   QPLUS: {
     label: "Q+",
-    templates: {}
+    templates: {
+      horizontal1: {
+        label: "横型1",
+        image: "./assets/qplus-horizontal-1-base.png?v=1",
+        width: 595,
+        height: 238,
+        canvasScale: 34,
+        layers: [
+          textLayer("benefit", "ドライヤー時間 30%短縮", 298, 48, 34, "#ffffff", 700, "horizontal", { label: "訴求2", box: [36, 18, 520, 58], align: "center", vAlign: "middle" }),
+          textLayer("note", "*自社調べ", 298, 82, 7, "#ffffff", 600, "horizontal", { label: "注釈", box: [260, 72, 76, 12], align: "center" }),
+          textLayer("sub", "芯からサラサラな髪", 298, 116, 26, "#231f20", 500, "horizontal", { label: "訴求3", box: [120, 88, 355, 38], align: "center", vAlign: "middle" }),
+          textLayer("main", "速乾 × 補修", 298, 175, 58, "#1c4378", 700, "horizontal", { label: "訴求1", box: [70, 126, 455, 82], align: "center", vAlign: "middle" })
+        ]
+      },
+      horizontal2: {
+        label: "横型2",
+        image: "./assets/qplus-horizontal-2-base.png?v=1",
+        width: 595,
+        height: 238,
+        canvasScale: 34,
+        layers: [
+          textLayer("sub", "芯からサラサラな髪", 298, 33, 26, "#231f20", 500, "horizontal", { label: "訴求3", box: [120, 12, 355, 36], align: "center", vAlign: "middle" }),
+          textLayer("main", "速乾 × 補修", 298, 103, 62, "#359db8", 700, "horizontal", { label: "訴求1", box: [70, 48, 455, 92], align: "center", vAlign: "middle" }),
+          textLayer("benefit", "ドライヤー時間 30%短縮", 298, 195, 35, "#ffffff", 700, "horizontal", { label: "訴求2", box: [48, 162, 500, 55], align: "center", vAlign: "middle" }),
+          textLayer("note", "*自社調べ", 298, 224, 7, "#ffffff", 600, "horizontal", { label: "注釈", box: [260, 214, 76, 12], align: "center" })
+        ]
+      },
+      round1: {
+        label: "丸型1",
+        image: "./assets/qplus-round-1-base.png?v=1",
+        width: 415,
+        height: 415,
+        canvasScale: 38,
+        layers: [
+          textLayer("benefit", "ドライヤー時間\n30%短縮", 208, 91, 43, "#ffffff", 700, "horizontal", { label: "訴求2", box: [58, 30, 300, 120], align: "center", vAlign: "middle" }),
+          textLayer("note", "*自社調べ", 208, 158, 8, "#ffffff", 600, "horizontal", { label: "注釈", box: [170, 148, 76, 14], align: "center" }),
+          textLayer("sub", "芯からサラサラな髪", 208, 203, 25, "#231f20", 500, "horizontal", { label: "訴求3", box: [72, 178, 270, 36], align: "center", vAlign: "middle" }),
+          textLayer("main", "速乾\n×補修", 208, 292, 45, "#1c4378", 700, "horizontal", { label: "訴求1", box: [55, 222, 305, 118], align: "center", vAlign: "middle" })
+        ]
+      },
+      round2: {
+        label: "丸型2",
+        image: "./assets/qplus-round-2-base.png?v=1",
+        width: 406,
+        height: 394,
+        canvasScale: 38,
+        layers: [
+          textLayer("main", "速乾\n×補修", 203, 118, 48, "#359db8", 700, "horizontal", { label: "訴求1", box: [74, 28, 258, 142], align: "center", vAlign: "middle" }),
+          textLayer("sub", "芯からサラサラな髪", 203, 219, 24, "#231f20", 500, "horizontal", { label: "訴求3", box: [45, 194, 316, 38], align: "center", vAlign: "middle" }),
+          textLayer("benefit", "ドライヤー時間\n30%短縮", 203, 309, 31, "#ffffff", 700, "horizontal", { label: "訴求2", box: [80, 260, 246, 92], align: "center", vAlign: "middle" }),
+          textLayer("note", "*社調べ", 203, 365, 7, "#ffffff", 600, "horizontal", { label: "注釈", box: [166, 354, 74, 14], align: "center" })
+        ]
+      },
+      vertical1: {
+        label: "縦型1",
+        image: "./assets/qplus-vertical-1-base.png?v=1",
+        width: 181,
+        height: 530,
+        canvasScale: 20,
+        layers: [
+          textLayer("benefit", "ドライヤー時間\n30%\n短縮", 91, 78, 25, "#ffffff", 700, "horizontal", { label: "訴求2", box: [23, 21, 136, 126], align: "center", vAlign: "middle" }),
+          textLayer("note", "*自社調べ", 91, 145, 9, "#ffffff", 600, "horizontal", { label: "注釈", box: [57, 136, 68, 14], align: "center" }),
+          textLayer("main", "速乾\n×\n補修", 58, 321, 33, "#1c4378", 700, "vertical", { label: "訴求1", box: [24, 158, 58, 340], align: "center", vAlign: "middle", clip: false }),
+          textLayer("sub", "芯からサラサラな髪", 124, 318, 21, "#231f20", 700, "vertical", { label: "訴求3", box: [97, 166, 60, 321], align: "center", vAlign: "middle", clip: false })
+        ]
+      },
+      vertical2: {
+        label: "縦型2",
+        image: "./assets/qplus-vertical-2-base.png?v=1",
+        width: 153,
+        height: 530,
+        canvasScale: 22,
+        layers: [
+          textLayer("benefit", "ドライヤー時間\n30%\n短縮", 77, 67, 24, "#1c4378", 700, "horizontal", { label: "訴求2", box: [23, 18, 108, 96], align: "center", vAlign: "middle" }),
+          textLayer("note", "※自社調べ", 77, 117, 6, "#0f0a08", 600, "horizontal", { label: "注釈", box: [54, 108, 44, 10], align: "center" }),
+          textLayer("main", "速乾\n×\n補修", 47, 331, 36, "#ffffff", 700, "vertical", { label: "訴求1", box: [21, 134, 60, 363], align: "center", vAlign: "middle", clip: false, shadow: true }),
+          textLayer("sub", "芯からサラサラな髪", 108, 315, 21, "#ffffff", 700, "vertical", { label: "訴求3", box: [88, 143, 40, 324], align: "center", vAlign: "middle", clip: false, shadow: true })
+        ]
+      }
+    }
   }
 };
 
@@ -98,6 +237,7 @@ let dragState = null;
 let productDragState = null;
 let textDragState = null;
 let activeTab = "editor";
+let exportCount = Number(localStorage.getItem(EXPORT_COUNT_KEY) || 0);
 
 let state = {
   name: "新規ATシール",
@@ -106,6 +246,7 @@ let state = {
   layers: cloneLayers(currentTemplate().layers),
   elements: [],
   showNotes: true,
+  layerVisibility: {},
   canvas: {
     scale: currentTemplate().canvasScale,
     shadowBlur: 22,
@@ -132,8 +273,8 @@ function textLayer(id, text, x, y, fontSize, color, weight, direction, options =
     vAlign: options.vAlign || "top",
     clip: options.clip !== false,
     charStyles: {},
-    shadow: false,
-    glow: false
+    shadow: options.shadow || false,
+    glow: options.glow || false
   };
 }
 
@@ -161,10 +302,11 @@ function findMatchingLayer(sourceLayers, targetLayer, usedIndexes = new Set()) {
   return null;
 }
 
-function carryLayerEdits(nextTemplate, previousTemplate, previousLayers) {
+function carryLayerEdits(nextTemplate, previousTemplate, previousLayers, options = {}) {
   const nextLayers = cloneLayers(nextTemplate.layers);
   const usedLayerIndexes = new Set();
   const usedDefaultIndexes = new Set();
+  const useTemplateColors = options.useTemplateColors || nextTemplate.image?.includes("qplus-") || nextTemplate.image?.includes("wh-");
   const carriedTemplateLayers = nextLayers.map((nextLayer) => {
     const previousLayer = findMatchingLayer(previousLayers || [], nextLayer, usedLayerIndexes);
     if (!previousLayer) return nextLayer;
@@ -174,14 +316,14 @@ function carryLayerEdits(nextTemplate, previousTemplate, previousLayers) {
     return {
       ...nextLayer,
       text: previousLayer.text,
-      color: previousLayer.color,
+      color: useTemplateColors ? nextLayer.color : previousLayer.color,
       fontWeight: previousLayer.fontWeight,
       fontFamily: previousLayer.fontFamily,
       lineHeight: previousLayer.lineHeight,
       letterSpacing: previousLayer.letterSpacing,
       shadow: previousLayer.shadow,
       glow: previousLayer.glow,
-      charStyles: JSON.parse(JSON.stringify(previousLayer.charStyles || {})),
+      charStyles: useTemplateColors ? {} : JSON.parse(JSON.stringify(previousLayer.charStyles || {})),
       fontSize: Math.max(6, nextLayer.fontSize * sizeRatio)
     };
   });
@@ -228,10 +370,22 @@ function currentTemplate() {
   return brandGroups[selectedBrand].templates[selectedTemplate] || brandGroups.ALLNA_ORGANIC.templates.horizontal;
 }
 
+function canvasPadding(template = currentTemplate()) {
+  const isTallTemplate = template.height > template.width * 1.5;
+  if (template.image?.includes("qplus-vertical")) {
+    return { x: 70, y: 108 };
+  }
+  if (isTallTemplate) {
+    return { x: EDITOR_CANVAS_PADDING, y: 108 };
+  }
+  return { x: EDITOR_CANVAS_PADDING, y: EDITOR_CANVAS_PADDING };
+}
+
 function canvasDimensions(template = currentTemplate()) {
+  const padding = canvasPadding(template);
   return {
-    width: template.width + EDITOR_CANVAS_PADDING * 2,
-    height: template.height + EDITOR_CANVAS_PADDING * 2
+    width: template.width + padding.x * 2,
+    height: template.height + padding.y * 2
   };
 }
 
@@ -243,8 +397,27 @@ function editableItems() {
   return [...(state.layers || []), ...(state.elements || [])];
 }
 
+function visibleLayerIdsFor(layer) {
+  if (layer.id?.startsWith("custom-text-")) return [layer.id];
+  if (layer.id === "note") return ["note"];
+  if (String(layer.label || "").startsWith("訴求1") || layer.id === "main") return ["main"];
+  if (String(layer.label || "").startsWith("訴求2") || layer.id === "rank" || layer.id === "benefit") return ["rank"];
+  if (String(layer.label || "").startsWith("訴求3") || layer.id === "band") return ["appeal3"];
+  return [];
+}
+
+function isLayerVisible(layer) {
+  const ids = visibleLayerIdsFor(layer);
+  if (!ids.length) return true;
+  return ids.every((id) => state.layerVisibility?.[id] !== false);
+}
+
 function visibleTextLayers() {
-  return (state.layers || []).filter((layer) => state.showNotes || layer.id !== "note");
+  return (state.layers || []).filter(isLayerVisible);
+}
+
+function isCustomTextLayer(layer) {
+  return layer.id?.startsWith("custom-text-");
 }
 
 function visibleEditableItems() {
@@ -338,12 +511,19 @@ function clipPathMarkup(layer) {
   return `<clipPath id="${layerClipId(layer)}"><rect x="${layer.box.x - padding}" y="${layer.box.y - padding}" width="${layer.box.width + padding * 2}" height="${layer.box.height + padding * 2}"/></clipPath>`;
 }
 
+function defaultMedalSize(template = currentTemplate()) {
+  const isTallTemplate = template.height > template.width * 1.5;
+  return isTallTemplate ? 59 : 132;
+}
+
 function createMedal() {
   const template = currentTemplate();
-  const size = Math.min(template.width, template.height) * 0.33;
+  const size = defaultMedalSize(template);
   const isVertical = selectedTemplate === "vertical";
   const x = isVertical ? template.width - size - 10 : template.width - size * 0.9;
   const y = isVertical ? 10 : size * 0.2;
+  const box = { x, y, width: size, height: size };
+  const textBox = defaultMedalTextBox({ box });
   return {
     id: `medal-${crypto.randomUUID()}`,
     kind: "medal",
@@ -351,7 +531,8 @@ function createMedal() {
     text: "メダル内文言1\nメダル内文言2\nメダル内文言3",
     x,
     y,
-    box: { x, y, width: size, height: size },
+    box,
+    textBox,
     fontSize: size * 0.16,
     color: "#0f0a08",
     fontWeight: "700",
@@ -362,6 +543,43 @@ function createMedal() {
     align: "center",
     vAlign: "middle",
     charStyles: {},
+    shadow: false,
+    glow: false
+  };
+}
+
+function createMedal2() {
+  const template = currentTemplate();
+  const width = Math.min(Math.max(190, template.width * 0.58), 300);
+  const height = width * 115 / 369;
+  const x = Math.max(8, (template.width - width) / 2);
+  const y = Math.max(8, template.height * 0.08);
+  const box = { x, y, width, height };
+  const textBox = defaultMedal2TextBox({ box });
+  const headlineSize = Math.max(9, height * 0.13);
+  const noteSize = Math.max(7, height * 0.09);
+  return {
+    id: `medal2-${crypto.randomUUID()}`,
+    kind: "medal2",
+    label: "メダル2",
+    text: "シリーズ累計販売個数\n439万個突破\n*2017年7月〜2026年3月",
+    x,
+    y,
+    box,
+    textBox,
+    fontSize: Math.max(12, height * 0.28),
+    color: "#0f0a08",
+    fontWeight: "700",
+    fontFamily: fonts[1].value,
+    lineHeight: 1.05,
+    letterSpacing: 0,
+    direction: "horizontal",
+    align: "center",
+    vAlign: "middle",
+    charStyles: Object.fromEntries([
+      ...Array.from({ length: 10 }, (_, index) => [index, { fontSize: headlineSize }]),
+      ...Array.from({ length: 17 }, (_, index) => [19 + index, { fontSize: noteSize }])
+    ]),
     shadow: false,
     glow: false
   };
@@ -398,38 +616,106 @@ function createBubble() {
   };
 }
 
+function createImageMaterial(type) {
+  const material = FRAGRANCE_MATERIALS[type];
+  const template = currentTemplate();
+  const width = Math.min(template.width * 0.28, material.width);
+  const height = width * material.height / material.width;
+  const x = Math.max(8, template.width - width - 28);
+  const y = Math.max(8, template.height - height - 26);
+  return {
+    id: `material-${type}-${crypto.randomUUID()}`,
+    kind: "image",
+    label: material.label,
+    text: material.label,
+    materialType: type,
+    image: material.image,
+    x,
+    y,
+    box: { x, y, width, height },
+    fontSize: 12,
+    color: "#0f0a08",
+    fontWeight: "400",
+    fontFamily: fonts[0].value,
+    lineHeight: 1,
+    letterSpacing: 0,
+    direction: "horizontal",
+    align: "center",
+    vAlign: "middle",
+    charStyles: {},
+    shadow: false,
+    glow: false
+  };
+}
+
 function shiftLayerForCanvas(layer) {
+  const padding = canvasPadding();
   const shifted = {
     ...layer,
-    x: (layer.x || 0) + EDITOR_CANVAS_PADDING,
-    y: (layer.y || 0) + EDITOR_CANVAS_PADDING
+    x: (layer.x || 0) + padding.x,
+    y: (layer.y || 0) + padding.y
   };
   if (layer.box) {
     shifted.box = {
-      x: layer.box.x + EDITOR_CANVAS_PADDING,
-      y: layer.box.y + EDITOR_CANVAS_PADDING,
+      x: layer.box.x + padding.x,
+      y: layer.box.y + padding.y,
       width: layer.box.width,
       height: layer.box.height
+    };
+  }
+  if (layer.textBox) {
+    shifted.textBox = {
+      x: layer.textBox.x + padding.x,
+      y: layer.textBox.y + padding.y,
+      width: layer.textBox.width,
+      height: layer.textBox.height
     };
   }
   return shifted;
 }
 
-function medalMarkup(item, medalImageHref = new URL(MEDAL_IMAGE, window.location.href).href) {
+function defaultMedalTextBox(item) {
   const box = item.box;
   const r = Math.min(box.width, box.height) / 2;
+  return {
+    x: box.x + r * 0.28,
+    y: box.y + r * 0.38,
+    width: box.width - r * 0.56,
+    height: box.height - r * 0.56
+  };
+}
+
+function defaultMedal2TextBox(item) {
+  const box = item.box;
+  return {
+    x: box.x + box.width * 0.14,
+    y: box.y + box.height * 0.18,
+    width: box.width * 0.72,
+    height: box.height * 0.68
+  };
+}
+
+function medalMarkup(item, medalImageHref = new URL(MEDAL_IMAGE, window.location.href).href) {
+  const box = item.box;
   const textLayerForMedal = {
     ...item,
-    box: {
-      x: box.x + r * 0.28,
-      y: box.y + r * 0.38,
-      width: box.width - r * 0.56,
-      height: box.height - r * 0.56
-    }
+    box: item.textBox || defaultMedalTextBox(item)
   };
-  return `<g data-layer-id="${item.id}" style="cursor:move">
-    <image href="${medalImageHref}" x="${box.x}" y="${box.y}" width="${box.width}" height="${box.height}" preserveAspectRatio="xMidYMid meet"/>
-    ${textMarkup(textLayerForMedal)}
+  return `<g style="cursor:move">
+    <image data-layer-id="${item.id}" data-drag-part="image" href="${medalImageHref}" x="${box.x}" y="${box.y}" width="${box.width}" height="${box.height}" preserveAspectRatio="xMidYMid meet"/>
+    ${textMarkup(textLayerForMedal, `data-drag-part="text"`)}
+  </g>`;
+}
+
+function medal2Markup(item, medalImageHref = new URL(MEDAL2_IMAGE, window.location.href).href) {
+  const box = item.box;
+  const textLayerForMedal = {
+    ...item,
+    box: item.textBox || defaultMedal2TextBox(item)
+  };
+  return `<g style="cursor:move">
+    <image data-layer-id="${item.id}" data-drag-part="image" href="${medalImageHref}" x="${box.x}" y="${box.y}" width="${box.width}" height="${box.height}" preserveAspectRatio="xMidYMid meet"/>
+    ${textMarkup(textLayerForMedal, `data-drag-part="text"`)}
   </g>`;
 }
 
@@ -463,6 +749,14 @@ function bubbleMarkup(item) {
   </g>`;
 }
 
+function imageMaterialMarkup(item) {
+  const href = new URL(item.image, window.location.href).href;
+  const box = item.box;
+  return `<g data-layer-id="${item.id}" style="cursor:move">
+    <image href="${href}" x="${box.x}" y="${box.y}" width="${box.width}" height="${box.height}" preserveAspectRatio="xMidYMid meet"/>
+  </g>`;
+}
+
 function textLineMarkup(layer, line, lineIndex, x, y, fontSize, anchor, globalStartIndex) {
   if (!layer.charStyles || !Object.keys(layer.charStyles).length) {
     return `<tspan x="${x}" dy="${lineIndex === 0 ? 0 : fontSize * layer.lineHeight}">${escapeXml(line)}</tspan>`;
@@ -476,14 +770,14 @@ function textLineMarkup(layer, line, lineIndex, x, y, fontSize, anchor, globalSt
   </tspan>`;
 }
 
-function textMarkup(layer) {
+function textMarkup(layer, extraAttributes = "") {
   const filter = layer.glow ? "url(#glow)" : layer.shadow ? "url(#textShadow)" : "";
   const lines = String(layer.text).split("\n");
   const fontSize = fittedFontSize(layer, lines);
   const lineHeight = Number(layer.lineHeight) || 1.08;
   const letterSpacing = Number(layer.letterSpacing) || 0;
   const box = layer.box || { x: layer.x, y: layer.y - fontSize, width: 1, height: fontSize };
-  const clip = layer.box && layer.clip !== false ? `clip-path="url(#${layerClipId(layer)})"` : "";
+  const clip = "";
 
   if (layer.direction === "vertical") {
     const columns = lines;
@@ -494,7 +788,7 @@ function textMarkup(layer) {
     const startX = box.x + (box.width + totalWidth) / 2 - fontSize / 2;
     const startY = box.y + (layer.vAlign === "middle" ? Math.max(0, (box.height - maxColumnHeight) / 2) : 0);
     let globalIndex = 0;
-    return `<g data-layer-id="${layer.id}" filter="${filter}" ${clip} style="cursor:pointer">
+    return `<g data-layer-id="${layer.id}" ${extraAttributes} filter="${filter}" ${clip} style="cursor:pointer">
       ${columns.map((line, columnIndex) => {
         const chars = Array.from(line);
         const markup = `
@@ -519,7 +813,7 @@ function textMarkup(layer) {
   const x = layer.align === "left" ? box.x : layer.align === "right" ? box.x + box.width : box.x + box.width / 2;
   const y = box.y + (layer.vAlign === "middle" ? Math.max(fontSize, (box.height - totalHeight) / 2 + fontSize) : fontSize);
   let globalStart = 0;
-  return `<text data-layer-id="${layer.id}" x="${x}" y="${y}" text-anchor="${textAnchor}"
+  return `<text data-layer-id="${layer.id}" ${extraAttributes} x="${x}" y="${y}" text-anchor="${textAnchor}"
     font-family="${escapeXml(layer.fontFamily)}" font-size="${fontSize}"
     font-weight="${layer.fontWeight}" letter-spacing="${letterSpacing}"
     fill="${layer.color}" filter="${filter}" ${clip} style="cursor:pointer">
@@ -536,7 +830,10 @@ function stickerSvg(options = {}) {
   const canvas = canvasDimensions(template);
   const imageHref = options.templateImageHref || new URL(template.image, window.location.href).href;
   const medalImageHref = options.medalImageHref || new URL(MEDAL_IMAGE, window.location.href).href;
+  const medal2ImageHref = options.medal2ImageHref || new URL(MEDAL2_IMAGE, window.location.href).href;
   const shiftedTextLayers = visibleTextLayers().map(shiftLayerForCanvas);
+  const shiftedBaseTextLayers = shiftedTextLayers.filter((layer) => !isCustomTextLayer(layer));
+  const shiftedCustomTextLayers = shiftedTextLayers.filter(isCustomTextLayer);
   const shiftedItems = visibleEditableItems().map(shiftLayerForCanvas);
   const shiftedElements = (state.elements || []).map(shiftLayerForCanvas);
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${canvas.width}" height="${canvas.height}" viewBox="0 0 ${canvas.width} ${canvas.height}">
@@ -552,9 +849,10 @@ function stickerSvg(options = {}) {
       </filter>
       ${shiftedItems.filter((layer) => layer.box).map(clipPathMarkup).join("")}
     </defs>
-    <image href="${imageHref}" x="${EDITOR_CANVAS_PADDING}" y="${EDITOR_CANVAS_PADDING}" width="${template.width}" height="${template.height}" preserveAspectRatio="xMidYMid meet"/>
-    ${shiftedTextLayers.map(textMarkup).join("")}
-    ${shiftedElements.map((item) => item.kind === "medal" ? medalMarkup(item, medalImageHref) : item.kind === "bubble" ? bubbleMarkup(item) : "").join("")}
+    <image href="${imageHref}" x="${canvasPadding(template).x}" y="${canvasPadding(template).y}" width="${template.width}" height="${template.height}" preserveAspectRatio="xMidYMid meet"/>
+    ${shiftedBaseTextLayers.map(textMarkup).join("")}
+    ${shiftedElements.map((item) => item.kind === "medal" ? medalMarkup(item, medalImageHref) : item.kind === "medal2" ? medal2Markup(item, medal2ImageHref) : item.kind === "bubble" ? bubbleMarkup(item) : item.kind === "image" ? imageMaterialMarkup(item) : "").join("")}
+    ${shiftedCustomTextLayers.map(textMarkup).join("")}
   </svg>`;
 }
 
@@ -744,29 +1042,44 @@ function drawBubbleCanvas(ctx, item) {
 async function renderStickerCanvas() {
   const template = currentTemplate();
   const size = canvasDimensions(template);
-  const [templateImage, medalImage] = await Promise.all([
+  const [templateImage, medalImage, medal2Image] = await Promise.all([
     loadAssetImage(template.image),
-    loadAssetImage(MEDAL_IMAGE)
+    loadAssetImage(MEDAL_IMAGE),
+    loadAssetImage(MEDAL2_IMAGE)
   ]);
   const canvas = document.createElement("canvas");
   canvas.width = size.width;
   canvas.height = size.height;
   const ctx = canvas.getContext("2d");
+  const padding = canvasPadding(template);
   ctx.clearRect(0, 0, size.width, size.height);
-  ctx.drawImage(templateImage, EDITOR_CANVAS_PADDING, EDITOR_CANVAS_PADDING, template.width, template.height);
-  visibleTextLayers().map(shiftLayerForCanvas).forEach((layer) => drawTextCanvas(ctx, layer));
-  (state.elements || []).map(shiftLayerForCanvas).forEach((item) => {
+  ctx.drawImage(templateImage, padding.x, padding.y, template.width, template.height);
+  const shiftedTextLayers = visibleTextLayers().map(shiftLayerForCanvas);
+  shiftedTextLayers.filter((layer) => !isCustomTextLayer(layer)).forEach((layer) => drawTextCanvas(ctx, layer));
+  for (const item of (state.elements || []).map(shiftLayerForCanvas)) {
     if (item.kind === "medal") {
       const box = item.box;
       const r = Math.min(box.width, box.height) / 2;
       ctx.drawImage(medalImage, box.x, box.y, box.width, box.height);
       drawTextCanvas(ctx, {
         ...item,
-        box: {
+        box: item.textBox || {
           x: box.x + r * 0.28,
           y: box.y + r * 0.38,
           width: box.width - r * 0.56,
           height: box.height - r * 0.56
+        }
+      });
+    } else if (item.kind === "medal2") {
+      const box = item.box;
+      ctx.drawImage(medal2Image, box.x, box.y, box.width, box.height);
+      drawTextCanvas(ctx, {
+        ...item,
+        box: item.textBox || {
+          x: box.x + box.width * 0.14,
+          y: box.y + box.height * 0.18,
+          width: box.width * 0.72,
+          height: box.height * 0.68
         }
       });
     } else if (item.kind === "bubble") {
@@ -781,8 +1094,12 @@ async function renderStickerCanvas() {
           height: item.box.height - radius
         }
       });
+    } else if (item.kind === "image") {
+      const image = await loadAssetImage(item.image);
+      ctx.drawImage(image, item.box.x, item.box.y, item.box.width, item.box.height);
     }
-  });
+  }
+  shiftedTextLayers.filter(isCustomTextLayer).forEach((layer) => drawTextCanvas(ctx, layer));
   return canvas;
 }
 
@@ -797,6 +1114,7 @@ function renderSticker() {
       const point = pointerBasePoint(event, svg);
       textDragState = {
         id: selectedLayerId,
+        part: event.currentTarget.dataset.dragPart || "",
         lastX: point.x,
         lastY: point.y
       };
@@ -833,38 +1151,52 @@ function renderTemplateOptions() {
   });
 }
 
-function appendNoteToggle() {
-  const label = document.createElement("label");
-  label.id = "noteToggleControl";
-  label.className = "inline-check note-toggle-control";
-  label.innerHTML = `<input id="showNotesToggle" type="checkbox" ${state.showNotes !== false ? "checked" : ""}> 注釈あり`;
-  label.querySelector("input").addEventListener("change", (event) => {
-    pushHistory();
-    state.showNotes = event.target.checked;
-    renderAll();
-    commitStickerToCanvas();
-  });
-  $("layerList").appendChild(label);
+function toggleVisibilityIdsForLayer(layer) {
+  const ids = visibleLayerIdsFor(layer);
+  return ids.length ? ids : null;
+}
+
+function layerIsChecked(layer) {
+  const ids = toggleVisibilityIdsForLayer(layer);
+  return !ids || ids.every((id) => state.layerVisibility?.[id] !== false);
 }
 
 function renderLayers() {
   $("layerList").innerHTML = "";
-  let noteToggleAdded = false;
-  visibleEditableItems().forEach((layer) => {
-    if (layer.id === "note") {
-      appendNoteToggle();
-      noteToggleAdded = true;
+  editableItems().forEach((layer) => {
+    const btn = document.createElement("div");
+    const toggleIds = toggleVisibilityIdsForLayer(layer);
+    const checked = layerIsChecked(layer);
+    btn.className = `layer-item ${layer.id === selectedLayerId ? "active" : ""} ${checked ? "" : "is-hidden"}`;
+    btn.setAttribute("role", "button");
+    btn.tabIndex = 0;
+    btn.innerHTML = `<span class="check-slot">${toggleIds ? `<input type="checkbox" ${checked ? "checked" : ""} aria-label="${escapeXml(layer.label || layer.id)} 表示">` : ""}</span>
+      <span class="layer-copy"><strong>${escapeXml(layer.label || layer.id)}</strong><small>${escapeXml(String(layer.text || "").split("\n").join(" / ").slice(0, 36) || "空の文章")}</small></span>`;
+    const checkbox = btn.querySelector("input");
+    if (checkbox) {
+      checkbox.addEventListener("click", (event) => event.stopPropagation());
+      checkbox.addEventListener("change", (event) => {
+        pushHistory();
+        if (!state.layerVisibility) state.layerVisibility = {};
+        toggleIds.forEach((id) => {
+          state.layerVisibility[id] = event.target.checked;
+        });
+        renderAll();
+        commitStickerToCanvas();
+      });
     }
-    const btn = document.createElement("button");
-    btn.className = `layer-item ${layer.id === selectedLayerId ? "active" : ""}`;
-    btn.innerHTML = `<span>${escapeXml(layer.label || layer.id)}</span><small>${escapeXml(layer.text.split("\n").join(" / ").slice(0, 36) || "空の文章")}</small>`;
     btn.addEventListener("click", () => {
+      selectedLayerId = layer.id;
+      renderAll();
+    });
+    btn.addEventListener("keydown", (event) => {
+      if (event.key !== "Enter" && event.key !== " ") return;
+      event.preventDefault();
       selectedLayerId = layer.id;
       renderAll();
     });
     $("layerList").appendChild(btn);
   });
-  if (!noteToggleAdded) appendNoteToggle();
 }
 
 function syncControls() {
@@ -876,8 +1208,10 @@ function syncControls() {
 
   const layer = currentLayer();
   if (!layer) return;
-  const showNotesToggle = $("showNotesToggle");
-  if (showNotesToggle) showNotesToggle.checked = state.showNotes !== false;
+  ["main", "rank", "note"].forEach((id) => {
+    const toggle = $(`${id}Toggle`);
+    if (toggle) toggle.checked = state.layerVisibility?.[id] !== false;
+  });
   $("textContent").value = layer.text;
   $("fontFamily").value = layer.fontFamily;
   $("textColor").value = layer.color;
@@ -887,14 +1221,15 @@ function syncControls() {
   $("fontWeight").value = layer.fontWeight;
   $("lineHeight").value = layer.lineHeight;
   $("letterSpacing").value = layer.letterSpacing;
-  $("textX").value = layer.box ? layer.box.x : layer.x;
-  $("textY").value = layer.box ? layer.box.y : layer.y;
+  const positionBox = (layer.kind === "medal" || layer.kind === "medal2") ? layer.textBox || layer.box : layer.box;
+  $("textX").value = positionBox ? positionBox.x : layer.x;
+  $("textY").value = positionBox ? positionBox.y : layer.y;
   $("textDirection").value = layer.direction;
   $("textShadow").checked = layer.shadow;
   $("textGlow").checked = layer.glow;
   $("elementSizeControl").style.display = layer.kind ? "grid" : "none";
   $("bubbleControls").style.display = layer.kind === "bubble" ? "grid" : "none";
-  $("deleteSelectedBtn").style.display = layer.kind ? "inline-flex" : "none";
+  $("deleteSelectedBtn").style.display = (layer.kind || layer.id?.startsWith("custom-text-")) ? "inline-flex" : "none";
   if (layer.kind) {
     $("elementSize").max = Math.max(currentTemplate().width, currentTemplate().height) + EDITOR_CANVAS_PADDING;
     $("elementSize").value = Math.round(layer.box.width);
@@ -935,9 +1270,12 @@ function renderSavedList() {
 
 function renderAll() {
   normalizeLoadedState();
-  if (!state.showNotes && selectedLayerId === "note") selectedLayerId = visibleEditableItems()[0]?.id || "";
-  const isVertical = selectedTemplate === "vertical";
-  const stageHeight = `${EDITOR_STAGE_SIZE}px`;
+  if (!visibleEditableItems().some((item) => item.id === selectedLayerId)) {
+    selectedLayerId = visibleEditableItems()[0]?.id || "";
+  }
+  const template = currentTemplate();
+  const isVertical = template.height > template.width * 1.5;
+  const stageHeight = `${isVertical ? Math.round(EDITOR_STAGE_SIZE * 1.25) : EDITOR_STAGE_SIZE}px`;
   $("stickerMount").classList.toggle("vertical-stage", isVertical);
   document.querySelector(".sticker-stage").classList.toggle("vertical-stage", isVertical);
   $("stickerMount").style.width = `${EDITOR_STAGE_SIZE}px`;
@@ -994,7 +1332,7 @@ function changeBrand(brandKey) {
     const previousElements = JSON.parse(JSON.stringify(state.elements || []));
     state.brand = selectedBrand;
     state.template = selectedTemplate;
-    state.layers = carryLayerEdits(templates[selectedTemplate], previousTemplate, previousLayers);
+    state.layers = carryLayerEdits(templates[selectedTemplate], previousTemplate, previousLayers, { useTemplateColors: true });
     state.elements = carryElements(previousElements, previousTemplate, templates[selectedTemplate]);
     state.canvas.scale = templates[selectedTemplate].canvasScale;
     selectedLayerId = state.layers.find((layer) => layer.id === selectedLayerId)?.id || state.elements.find((element) => element.id === selectedLayerId)?.id || state.layers[0].id;
@@ -1006,6 +1344,12 @@ function changeBrand(brandKey) {
 function updateLayerField(key, value) {
   const layer = currentLayer();
   if (!layer) return;
+  if ((layer.kind === "medal" || layer.kind === "medal2") && (key === "x" || key === "y")) {
+    if (!layer.textBox) layer.textBox = layer.kind === "medal2" ? defaultMedal2TextBox(layer) : defaultMedalTextBox(layer);
+    layer.textBox[key] = value;
+    renderAll();
+    return;
+  }
   if ((key === "x" || key === "y") && layer.box) {
     const delta = value - layer.box[key];
     layer.box[key] = value;
@@ -1036,9 +1380,10 @@ function updateElementSize(value) {
   const next = Number(value);
   const cx = layer.box.x + layer.box.width / 2;
   const cy = layer.box.y + layer.box.height / 2;
-  const aspect = layer.kind === "bubble" ? layer.box.height / Math.max(layer.box.width, 1) : 1;
+  const keepAspect = layer.kind === "bubble" || layer.kind === "image" || layer.kind === "medal2";
+  const aspect = keepAspect ? layer.box.height / Math.max(layer.box.width, 1) : 1;
   layer.box.width = next;
-  layer.box.height = layer.kind === "bubble" ? next * aspect : next;
+  layer.box.height = keepAspect ? next * aspect : next;
   layer.box.x = cx - next / 2;
   layer.box.y = cy - layer.box.height / 2;
   layer.x = layer.box.x;
@@ -1050,9 +1395,17 @@ function updateElementSize(value) {
 function normalizeLoadedState() {
   if (!state.elements) state.elements = [];
   if (typeof state.showNotes !== "boolean") state.showNotes = true;
+  if (!state.layerVisibility) state.layerVisibility = {};
+  if (state.showNotes === false) state.layerVisibility.note = false;
+  state.showNotes = state.layerVisibility.note !== false;
+  const qplusDefaults = state.brand === "QPLUS" ? new Map((currentTemplate().layers || []).map((layer) => [layer.id, layer])) : null;
   state.layers.forEach((layer) => {
     if (!layer.label) layer.label = layer.id;
     if (!layer.charStyles) layer.charStyles = {};
+    if (qplusDefaults?.has(layer.id)) {
+      const defaultLayer = qplusDefaults.get(layer.id);
+      layer.color = defaultLayer.color;
+    }
     if (state.template === "vertical" && (layer.id === "main" || layer.id === "rank")) {
       layer.clip = false;
       layer.vAlign = "top";
@@ -1086,9 +1439,6 @@ function normalizeLoadedState() {
     if (state.template === "vertical" && layer.id === "band" && layer.text === "ラグジュアリー\n香り") {
       layer.text = "ラグジュアリー\nの香り";
     }
-    if (state.template === "horizontal" && layer.id === "main" && layer.text === "ダメージ補修 特化" && layer.fontSize < 40) {
-      layer.fontSize = 40;
-    }
     if (state.template === "round2" && layer.id === "main" && (layer.text === "サラサラな\n指通り" || layer.text === "ダメージ補修 特化")) {
       layer.text = "ダメージ補修\n特化";
     }
@@ -1104,10 +1454,31 @@ function normalizeLoadedState() {
   state.elements.forEach((layer) => {
     if (!layer.label) layer.label = "素材";
     if (!layer.charStyles) layer.charStyles = {};
+    if (layer.kind === "medal" && !layer.textBox) {
+      layer.textBox = defaultMedalTextBox(layer);
+    }
+    if (layer.kind === "medal2" && !layer.textBox) {
+      layer.textBox = defaultMedal2TextBox(layer);
+    }
+    if (layer.kind === "medal" && state.brand === "QPLUS") {
+      const size = defaultMedalSize(currentTemplate());
+      if (layer.box && layer.box.width < size * 0.9) {
+        layer.box.width = size;
+        layer.box.height = size;
+        layer.fontSize = Math.max(layer.fontSize || 0, size * 0.16);
+      }
+    }
     if (layer.kind === "bubble") {
       if (!layer.tailSide || layer.tailSide === "left") layer.tailSide = "bottom-left";
       if (layer.tailSide === "right") layer.tailSide = "bottom-right";
       if (!layer.fillColor) layer.fillColor = "#f5f3de";
+    }
+    if (layer.kind === "image") {
+      const material = FRAGRANCE_MATERIALS[layer.materialType];
+      if (material) {
+        layer.image = material.image;
+        if (!layer.label) layer.label = material.label;
+      }
     }
   });
 }
@@ -1115,6 +1486,14 @@ function normalizeLoadedState() {
 function addMedal() {
   pushHistory();
   const medal = createMedal();
+  state.elements.push(medal);
+  selectedLayerId = medal.id;
+  renderAll();
+}
+
+function addMedal2() {
+  pushHistory();
+  const medal = createMedal2();
   state.elements.push(medal);
   selectedLayerId = medal.id;
   renderAll();
@@ -1128,11 +1507,24 @@ function addBubble() {
   renderAll();
 }
 
+function addImageMaterial(type) {
+  pushHistory();
+  const material = createImageMaterial(type);
+  state.elements.push(material);
+  selectedLayerId = material.id;
+  renderAll();
+}
+
 function deleteSelectedItem() {
   const layer = currentLayer();
-  if (!layer?.kind) return;
+  if (!layer?.kind && !layer?.id?.startsWith("custom-text-")) return;
   pushHistory();
-  state.elements = (state.elements || []).filter((item) => item.id !== layer.id);
+  if (layer.kind) {
+    state.elements = (state.elements || []).filter((item) => item.id !== layer.id);
+  } else {
+    state.layers = (state.layers || []).filter((item) => item.id !== layer.id);
+    if (state.layerVisibility) delete state.layerVisibility[layer.id];
+  }
   selectedLayerId = visibleTextLayers()[0]?.id || state.layers[0]?.id || "";
   renderAll();
   commitStickerToCanvas();
@@ -1232,9 +1624,10 @@ function clearCharacterStyle() {
 function pointerBasePoint(event, svg) {
   const rect = svg.getBoundingClientRect();
   const canvas = canvasDimensions();
+  const padding = canvasPadding();
   return {
-    x: (event.clientX - rect.left) * canvas.width / rect.width - EDITOR_CANVAS_PADDING,
-    y: (event.clientY - rect.top) * canvas.height / rect.height - EDITOR_CANVAS_PADDING
+    x: (event.clientX - rect.left) * canvas.width / rect.width - padding.x,
+    y: (event.clientY - rect.top) * canvas.height / rect.height - padding.y
   };
 }
 
@@ -1251,12 +1644,19 @@ function moveSelectedText(event) {
   textDragState.lastY = nextY;
   const layer = editableItems().find((item) => item.id === textDragState.id);
   if (!layer) return;
+  if ((layer.kind === "medal" || layer.kind === "medal2") && textDragState.part === "text") {
+    if (!layer.textBox) layer.textBox = layer.kind === "medal2" ? defaultMedal2TextBox(layer) : defaultMedalTextBox(layer);
+    layer.textBox.x += dx;
+    layer.textBox.y += dy;
+    renderAll();
+    return;
+  }
   if (layer.box) {
     layer.box.x += dx;
     layer.box.y += dy;
   }
-  layer.x += dx;
-  layer.y += dy;
+  layer.x = (layer.x || 0) + dx;
+  layer.y = (layer.y || 0) + dy;
   renderAll();
 }
 
@@ -1302,6 +1702,17 @@ function readProjects() {
 
 function writeProjects(projects) {
   localStorage.setItem(STORE_KEY, JSON.stringify(projects));
+}
+
+function updateExportCounter() {
+  const counter = $("exportCount");
+  if (counter) counter.textContent = String(exportCount);
+}
+
+function incrementExportCounter() {
+  exportCount += 1;
+  localStorage.setItem(EXPORT_COUNT_KEY, String(exportCount));
+  updateExportCounter();
 }
 
 function saveProject(asNew) {
@@ -1354,6 +1765,7 @@ async function exportData() {
     link.href = await stickerPngDataUrl();
     link.download = `${state.name}.png`;
     link.click();
+    incrementExportCounter();
   } catch {
     alert("PNGを書き出せませんでした。");
   }
@@ -1429,6 +1841,7 @@ async function downloadJpg() {
     link.href = canvas.toDataURL("image/jpeg", .92);
     link.download = `${($("projectName").value || "thumbnail").trim()}.jpg`;
     link.click();
+    incrementExportCounter();
   } catch {
     alert("シールを反映したJPGを保存できませんでした。");
   }
@@ -1440,7 +1853,11 @@ function bindEvents() {
   $("undoBtn").addEventListener("click", undo);
   $("redoBtn").addEventListener("click", redo);
   $("addMedalBtn").addEventListener("click", addMedal);
+  $("addMedal2Btn").addEventListener("click", addMedal2);
   $("addBubbleBtn").addEventListener("click", addBubble);
+  $("addOrFragranceBtn").addEventListener("click", () => addImageMaterial("or"));
+  $("addQuFragranceBtn").addEventListener("click", () => addImageMaterial("qu"));
+  $("addMintMaterialBtn").addEventListener("click", () => addImageMaterial("mint"));
   $("addTextBtn").addEventListener("click", addTextLayer);
   $("deleteSelectedBtn").addEventListener("click", deleteSelectedItem);
   $("saveNewBtn").addEventListener("click", () => saveProject(true));
@@ -1541,6 +1958,7 @@ function init() {
   renderAll();
   switchTab(activeTab);
   commitStickerToCanvas();
+  updateExportCounter();
 }
 
 init();
