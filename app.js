@@ -3,6 +3,7 @@ const $ = (id) => document.getElementById(id);
 const STORE_KEY = "attentionSealTemplateProjects.v1";
 const EXPORT_COUNT_KEY = "attentionSealExportCount.v1";
 const SAVED_SORT_KEY = "attentionSealSavedSort.v1";
+const TEMPLATE_PRESET_VERSION = "or-qplus-wh-templates-20260716-1";
 const EDITOR_CANVAS_PADDING = 90;
 const EDITOR_STAGE_SIZE = 720;
 const MEDAL_IMAGE = "./assets/medal-base.png";
@@ -74,8 +75,8 @@ const brandGroups = {
         height: 400,
         canvasScale: 30,
         layers: [
-          textLayer("scent", "ラベンダー ×\nオレンジの香り", 250, 91, 18, "#0f0a08", 500, "horizontal", { label: "訴求2", box: [160, 72, 180, 50], align: "center", vAlign: "middle" }),
-          textLayer("sub", "ベタつかずに", 250, 157, 23, "#0f0a08", 600, "horizontal", { label: "訴求2", box: [145, 143, 210, 35], align: "center" }),
+          textLayer("scent", "ラベンダー ×\nオレンジの香り", 250, 91, 18, "#0f0a08", 500, "horizontal", { label: "訴求2 香り", box: [160, 72, 180, 50], align: "center", vAlign: "middle" }),
+          textLayer("sub", "ベタつかずに", 250, 157, 23, "#0f0a08", 600, "horizontal", { label: "訴求2 補助", box: [145, 143, 210, 35], align: "center" }),
           textLayer("main", "ダメージ補修\n特化", 250, 220, 45, "#651b20", 700, "horizontal", { label: "訴求1", box: [112, 180, 276, 100], align: "center", vAlign: "middle" }),
           textLayer("band", "ラグジュアリー の香り", 250, 318, 22, "#ffffff", 700, "horizontal", { label: "訴求3", box: [100, 294, 300, 54], align: "center", vAlign: "middle" }),
           textLayer("note", "*2026/1/21〜2026/2/2 ヘアオイル部門", 250, 370, 8, "#ffffff", 600, "horizontal", { label: "注釈", box: [116, 359, 268, 18], align: "center" })
@@ -225,6 +226,8 @@ const brandGroups = {
   }
 };
 
+applySavedTemplateProjects();
+
 let selectedBrand = "ALLNA_ORGANIC";
 let selectedTemplate = "horizontal";
 let selectedLayerId = "main";
@@ -246,9 +249,11 @@ let state = {
   brand: selectedBrand,
   template: selectedTemplate,
   layers: cloneLayers(currentTemplate().layers),
-  elements: [],
+  elements: templateDefaultElements(currentTemplate()),
   showNotes: true,
   layerVisibility: {},
+  templateEdits: {},
+  templatePresetVersion: TEMPLATE_PRESET_VERSION,
   canvas: {
     scale: currentTemplate().canvasScale,
     shadowBlur: 22,
@@ -274,6 +279,7 @@ function textLayer(id, text, x, y, fontSize, color, weight, direction, options =
     align: options.align || "center",
     vAlign: options.vAlign || "top",
     clip: options.clip !== false,
+    fitText: false,
     charStyles: {},
     shadow: options.shadow || false,
     glow: options.glow || false
@@ -282,6 +288,75 @@ function textLayer(id, text, x, y, fontSize, color, weight, direction, options =
 
 function cloneLayers(layers) {
   return JSON.parse(JSON.stringify(layers));
+}
+
+function cloneElements(elements) {
+  return JSON.parse(JSON.stringify(elements || []));
+}
+
+function templateDefaultElements(template) {
+  return cloneElements(template?.defaultElements || []);
+}
+
+function persistCurrentTemplateEdit() {
+  if (!state?.brand || !state?.template) return;
+  if (!state.templateEdits) state.templateEdits = {};
+  if (!state.templateEdits[state.brand]) state.templateEdits[state.brand] = {};
+  state.templateEdits[state.brand][state.template] = {
+    layers: cloneLayers(state.layers || []),
+    elements: cloneElements(state.elements || [])
+  };
+}
+
+function templateEditFor(brandKey, templateKey) {
+  const edit = state.templateEdits?.[brandKey]?.[templateKey];
+  if (!edit) return null;
+  if (Array.isArray(edit)) return { layers: edit, elements: null };
+  return edit;
+}
+
+function restoreTemplateEdit(nextTemplate, savedLayers) {
+  const defaultIds = new Set((nextTemplate.layers || []).map((layer) => layer.id));
+  const restoredDefaults = cloneLayers(nextTemplate.layers).map((nextLayer) => {
+    const savedLayer = (savedLayers || []).find((layer) => layer.id === nextLayer.id);
+    return savedLayer ? { ...nextLayer, ...JSON.parse(JSON.stringify(savedLayer)) } : nextLayer;
+  });
+  const customLayers = (savedLayers || []).filter((layer) => !defaultIds.has(layer.id));
+  return [...restoredDefaults, ...JSON.parse(JSON.stringify(customLayers))];
+}
+
+function normalizeDefaultLayer(layer) {
+  return {
+    ...layer,
+    fitText: false,
+    charStyles: JSON.parse(JSON.stringify(layer.charStyles || {}))
+  };
+}
+
+function normalizeDefaultElement(element, templateKey, index) {
+  const next = {
+    ...element,
+    id: `${templateKey}-${element.kind || "element"}-${index}`,
+    fitText: false,
+    charStyles: JSON.parse(JSON.stringify(element.charStyles || {}))
+  };
+  if (next.materialType && FRAGRANCE_MATERIALS[next.materialType]) {
+    next.image = FRAGRANCE_MATERIALS[next.materialType].image;
+  }
+  return next;
+}
+
+function applySavedTemplateProjects() {
+  [
+    ...(window.OR_TEMPLATE_PROJECTS || []),
+    ...(window.QPLUS_TEMPLATE_PROJECTS || []),
+    ...(window.WH_TEMPLATE_PROJECTS || [])
+  ].forEach((project) => {
+    const template = templateFor(project.brand, project.template);
+    if (!template) return;
+    template.layers = cloneLayers(project.layers || []).map(normalizeDefaultLayer);
+    template.defaultElements = cloneElements(project.elements || []).map((element, index) => normalizeDefaultElement(element, project.template, index));
+  });
 }
 
 function templateFor(brandKey, templateKey) {
@@ -400,12 +475,7 @@ function editableItems() {
 }
 
 function visibleLayerIdsFor(layer) {
-  if (layer.id?.startsWith("custom-text-")) return [layer.id];
-  if (layer.id === "note") return ["note"];
-  if (String(layer.label || "").startsWith("訴求1") || layer.id === "main") return ["main"];
-  if (String(layer.label || "").startsWith("訴求2") || layer.id === "rank" || layer.id === "benefit") return ["rank"];
-  if (String(layer.label || "").startsWith("訴求3") || layer.id === "band") return ["appeal3"];
-  return [];
+  return layer.id ? [layer.id] : [];
 }
 
 function isLayerVisible(layer) {
@@ -481,7 +551,7 @@ function styleAt(layer, index, fittedSize) {
 }
 
 function fittedFontSize(layer, lines) {
-  if (layer.fitText === false) return layer.fontSize;
+  if (layer.fitText !== true) return Number(layer.fontSize) || 12;
   if (!layer.box) return layer.fontSize;
   const minSize = 6;
   const maxSize = layer.fontSize;
@@ -615,6 +685,7 @@ function createBubble() {
     direction: "horizontal",
     align: "center",
     vAlign: "middle",
+    fitText: false,
     charStyles: {},
     shadow: false,
     glow: false
@@ -635,6 +706,44 @@ function createImageMaterial(type) {
     text: material.label,
     materialType: type,
     image: material.image,
+    x,
+    y,
+    box: { x, y, width, height },
+    fontSize: 12,
+    color: "#0f0a08",
+    fontWeight: "400",
+    fontFamily: fonts[0].value,
+    lineHeight: 1,
+    letterSpacing: 0,
+    direction: "horizontal",
+    align: "center",
+    vAlign: "middle",
+    charStyles: {},
+    shadow: false,
+    glow: false
+  };
+}
+
+async function createCustomImageMaterial(file, removeBackground) {
+  const dataUrl = await fileToDataUrl(file);
+  const imageDataUrl = removeBackground ? await removeLightBackground(dataUrl) : dataUrl;
+  const image = await loadImage(imageDataUrl);
+  const template = currentTemplate();
+  const maxWidth = Math.max(90, template.width * 0.34);
+  const maxHeight = Math.max(70, template.height * 0.26);
+  const scale = Math.min(maxWidth / image.naturalWidth, maxHeight / image.naturalHeight, 1);
+  const width = Math.max(48, image.naturalWidth * scale);
+  const height = Math.max(30, image.naturalHeight * scale);
+  const x = Math.max(8, template.width - width - 28);
+  const y = Math.max(8, template.height - height - 26);
+  const name = file.name.replace(/\.[^.]+$/, "") || "追加素材";
+  return {
+    id: `material-custom-${crypto.randomUUID()}`,
+    kind: "image",
+    label: name,
+    text: name,
+    materialType: "custom",
+    image: imageDataUrl,
     x,
     y,
     box: { x, y, width, height },
@@ -707,7 +816,7 @@ function medalMarkup(item, medalImageHref = new URL(MEDAL_IMAGE, window.location
     box: item.textBox || defaultMedalTextBox(item)
   };
   return `<g style="cursor:move">
-    <image data-layer-id="${item.id}" data-drag-part="image" href="${medalImageHref}" x="${box.x}" y="${box.y}" width="${box.width}" height="${box.height}" preserveAspectRatio="xMidYMid meet"/>
+    <image data-layer-id="${item.id}" data-drag-part="image" href="${escapeXml(medalImageHref)}" x="${box.x}" y="${box.y}" width="${box.width}" height="${box.height}" preserveAspectRatio="xMidYMid meet"/>
     ${textMarkup(textLayerForMedal, `data-drag-part="text"`)}
   </g>`;
 }
@@ -719,7 +828,7 @@ function medal2Markup(item, medalImageHref = new URL(MEDAL2_IMAGE, window.locati
     box: item.textBox || defaultMedal2TextBox(item)
   };
   return `<g style="cursor:move">
-    <image data-layer-id="${item.id}" data-drag-part="image" href="${medalImageHref}" x="${box.x}" y="${box.y}" width="${box.width}" height="${box.height}" preserveAspectRatio="xMidYMid meet"/>
+    <image data-layer-id="${item.id}" data-drag-part="image" href="${escapeXml(medalImageHref)}" x="${box.x}" y="${box.y}" width="${box.width}" height="${box.height}" preserveAspectRatio="xMidYMid meet"/>
     ${textMarkup(textLayerForMedal, `data-drag-part="text"`)}
   </g>`;
 }
@@ -754,11 +863,10 @@ function bubbleMarkup(item) {
   </g>`;
 }
 
-function imageMaterialMarkup(item) {
-  const href = new URL(item.image, window.location.href).href;
+function imageMaterialMarkup(item, imageHref = new URL(item.image, window.location.href).href) {
   const box = item.box;
   return `<g data-layer-id="${item.id}" style="cursor:move">
-    <image href="${href}" x="${box.x}" y="${box.y}" width="${box.width}" height="${box.height}" preserveAspectRatio="xMidYMid meet"/>
+    <image href="${escapeXml(imageHref)}" x="${box.x}" y="${box.y}" width="${box.width}" height="${box.height}" preserveAspectRatio="xMidYMid meet"/>
   </g>`;
 }
 
@@ -854,9 +962,9 @@ function stickerSvg(options = {}) {
       </filter>
       ${shiftedItems.filter((layer) => layer.box).map(clipPathMarkup).join("")}
     </defs>
-    <image href="${imageHref}" x="${canvasPadding(template).x}" y="${canvasPadding(template).y}" width="${template.width}" height="${template.height}" preserveAspectRatio="xMidYMid meet"/>
+    <image href="${escapeXml(imageHref)}" x="${canvasPadding(template).x}" y="${canvasPadding(template).y}" width="${template.width}" height="${template.height}" preserveAspectRatio="xMidYMid meet"/>
     ${shiftedBaseTextLayers.map(textMarkup).join("")}
-    ${shiftedElements.map((item) => item.kind === "medal" ? medalMarkup(item, medalImageHref) : item.kind === "medal2" ? medal2Markup(item, medal2ImageHref) : item.kind === "bubble" ? bubbleMarkup(item) : item.kind === "image" ? imageMaterialMarkup(item) : "").join("")}
+    ${shiftedElements.map((item) => item.kind === "medal" ? medalMarkup(item, medalImageHref) : item.kind === "medal2" ? medal2Markup(item, medal2ImageHref) : item.kind === "bubble" ? bubbleMarkup(item) : item.kind === "image" ? imageMaterialMarkup(item, options.materialImageHrefs?.[item.image]) : "").join("")}
     ${shiftedCustomTextLayers.map(textMarkup).join("")}
   </svg>`;
 }
@@ -874,7 +982,41 @@ function blobToDataUrl(blob) {
   });
 }
 
+function fileToDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+async function removeLightBackground(dataUrl) {
+  const image = await loadImage(dataUrl);
+  const canvas = document.createElement("canvas");
+  canvas.width = image.naturalWidth;
+  canvas.height = image.naturalHeight;
+  const ctx = canvas.getContext("2d");
+  ctx.drawImage(image, 0, 0);
+  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const pixels = imageData.data;
+  for (let index = 0; index < pixels.length; index += 4) {
+    const r = pixels[index];
+    const g = pixels[index + 1];
+    const b = pixels[index + 2];
+    const max = Math.max(r, g, b);
+    const min = Math.min(r, g, b);
+    const isNeutralLight = min > 218 && max - min < 24;
+    if (!isNeutralLight) continue;
+    const fade = Math.max(0, Math.min(1, (255 - min) / 34));
+    pixels[index + 3] = Math.round(pixels[index + 3] * fade);
+  }
+  ctx.putImageData(imageData, 0, 0);
+  return canvas.toDataURL("image/png");
+}
+
 async function assetToDataUrl(path) {
+  if (String(path).startsWith("data:")) return path;
   const cleanPath = String(path).split("?")[0];
   const fileName = cleanPath.split("/").pop();
   if (window.ATTENTION_SEAL_ASSETS?.[fileName]) {
@@ -913,9 +1055,51 @@ async function loadSvgAsImage(svg) {
   }
 }
 
+async function stickerSvgWithEmbeddedImages() {
+  const template = currentTemplate();
+  const materialImageHrefs = {};
+  await Promise.all((state.elements || [])
+    .filter((item) => item.kind === "image" && item.image)
+    .map(async (item) => {
+      materialImageHrefs[item.image] = await assetToDataUrl(item.image);
+    }));
+  return stickerSvg({
+    templateImageHref: await assetToDataUrl(template.image),
+    medalImageHref: await assetToDataUrl(MEDAL_IMAGE),
+    medal2ImageHref: await assetToDataUrl(MEDAL2_IMAGE),
+    materialImageHrefs
+  });
+}
+
+async function stickerSvgCanvas() {
+  const template = currentTemplate();
+  const size = canvasDimensions(template);
+  const svg = await stickerSvgWithEmbeddedImages();
+  const blob = new Blob([svg], { type: "image/svg+xml;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const canvas = document.createElement("canvas");
+  canvas.width = size.width;
+  canvas.height = size.height;
+  const ctx = canvas.getContext("2d");
+  try {
+    const image = await loadImage(url);
+    ctx.clearRect(0, 0, size.width, size.height);
+    ctx.drawImage(image, 0, 0, size.width, size.height);
+    return canvas;
+  } finally {
+    URL.revokeObjectURL(url);
+  }
+}
+
 async function stickerPngDataUrl() {
-  const canvas = await renderStickerCanvas();
-  return canvas.toDataURL("image/png");
+  try {
+    const canvas = await stickerSvgCanvas();
+    return canvas.toDataURL("image/png");
+  } catch (error) {
+    console.warn("SVGからのPNG作成に失敗したため、通常描画で書き出します。", error);
+    const canvas = await renderStickerCanvas();
+    return canvas.toDataURL("image/png");
+  }
 }
 
 function canvasFont(layer, fontSize) {
@@ -1322,14 +1506,16 @@ function applyTemplate(templateKey) {
   pushHistory();
   const nextTemplate = brandGroups[selectedBrand].templates[templateKey];
   if (!nextTemplate) return;
+  persistCurrentTemplateEdit();
   const previousTemplate = templateFor(state.brand, state.template);
   const previousLayers = cloneLayers(state.layers || []);
   const previousElements = JSON.parse(JSON.stringify(state.elements || []));
   selectedTemplate = templateKey;
   state.template = templateKey;
   state.brand = selectedBrand;
-  state.layers = carryLayerEdits(nextTemplate, previousTemplate, previousLayers);
-  state.elements = carryElements(previousElements, previousTemplate, nextTemplate);
+  const savedEdit = templateEditFor(selectedBrand, templateKey);
+  state.layers = savedEdit?.layers ? restoreTemplateEdit(nextTemplate, savedEdit.layers) : (nextTemplate.defaultElements ? cloneLayers(nextTemplate.layers) : carryLayerEdits(nextTemplate, previousTemplate, previousLayers));
+  state.elements = savedEdit?.elements ? cloneElements(savedEdit.elements) : (nextTemplate.defaultElements ? templateDefaultElements(nextTemplate) : carryElements(previousElements, previousTemplate, nextTemplate));
   state.canvas.scale = nextTemplate.canvasScale;
   selectedLayerId = state.layers.find((layer) => layer.id === selectedLayerId)?.id || state.elements.find((element) => element.id === selectedLayerId)?.id || state.layers[0].id;
   renderAll();
@@ -1338,6 +1524,7 @@ function applyTemplate(templateKey) {
 
 function changeBrand(brandKey) {
   pushHistory();
+  persistCurrentTemplateEdit();
   selectedBrand = brandKey;
   const templates = brandGroups[selectedBrand].templates;
   selectedTemplate = Object.keys(templates)[0] || "horizontal";
@@ -1347,8 +1534,9 @@ function changeBrand(brandKey) {
     const previousElements = JSON.parse(JSON.stringify(state.elements || []));
     state.brand = selectedBrand;
     state.template = selectedTemplate;
-    state.layers = carryLayerEdits(templates[selectedTemplate], previousTemplate, previousLayers, { useTemplateColors: true });
-    state.elements = carryElements(previousElements, previousTemplate, templates[selectedTemplate]);
+    const savedEdit = templateEditFor(selectedBrand, selectedTemplate);
+    state.layers = savedEdit?.layers ? restoreTemplateEdit(templates[selectedTemplate], savedEdit.layers) : (templates[selectedTemplate].defaultElements ? cloneLayers(templates[selectedTemplate].layers) : carryLayerEdits(templates[selectedTemplate], previousTemplate, previousLayers, { useTemplateColors: true }));
+    state.elements = savedEdit?.elements ? cloneElements(savedEdit.elements) : (templates[selectedTemplate].defaultElements ? templateDefaultElements(templates[selectedTemplate]) : carryElements(previousElements, previousTemplate, templates[selectedTemplate]));
     state.canvas.scale = templates[selectedTemplate].canvasScale;
     selectedLayerId = state.layers.find((layer) => layer.id === selectedLayerId)?.id || state.elements.find((element) => element.id === selectedLayerId)?.id || state.layers[0].id;
   }
@@ -1371,6 +1559,12 @@ function updateLayerField(key, value) {
     layer[key] = (layer[key] || 0) + delta;
     renderAll();
     return;
+  }
+  if ((key === "fontSize" || key === "color") && layer.charStyles) {
+    Object.keys(layer.charStyles).forEach((styleKey) => {
+      delete layer.charStyles[styleKey][key];
+      if (!layer.charStyles[styleKey].fontSize && !layer.charStyles[styleKey].color) delete layer.charStyles[styleKey];
+    });
   }
   layer[key] = value;
   renderAll();
@@ -1409,6 +1603,14 @@ function updateElementSize(value) {
 
 function normalizeLoadedState() {
   if (!state.elements) state.elements = [];
+  if (!state.templateEdits) state.templateEdits = {};
+  if (state.templatePresetVersion !== TEMPLATE_PRESET_VERSION) {
+    state.templateEdits = {};
+    state.templatePresetVersion = TEMPLATE_PRESET_VERSION;
+    if (currentTemplate().defaultElements && !(state.elements || []).length) {
+      state.elements = templateDefaultElements(currentTemplate());
+    }
+  }
   if (typeof state.showNotes !== "boolean") state.showNotes = true;
   if (!state.layerVisibility) state.layerVisibility = {};
   if (state.showNotes === false && state.layerVisibility.note === undefined) state.layerVisibility.note = false;
@@ -1416,6 +1618,9 @@ function normalizeLoadedState() {
   const qplusDefaults = state.brand === "QPLUS" ? new Map((currentTemplate().layers || []).map((layer) => [layer.id, layer])) : null;
   state.layers.forEach((layer) => {
     if (!layer.label) layer.label = layer.id;
+    layer.fitText = false;
+    if (state.brand === "ALLNA_ORGANIC" && state.template === "round2" && layer.id === "scent" && layer.label === "訴求2") layer.label = "訴求2 香り";
+    if (state.brand === "ALLNA_ORGANIC" && state.template === "round2" && layer.id === "sub" && layer.label === "訴求2") layer.label = "訴求2 補助";
     if (!layer.charStyles) layer.charStyles = {};
     if (qplusDefaults?.has(layer.id)) {
       const defaultLayer = qplusDefaults.get(layer.id);
@@ -1531,6 +1736,19 @@ function addImageMaterial(type) {
   state.elements.push(material);
   selectedLayerId = material.id;
   renderAll();
+}
+
+async function addCustomImageMaterial(file) {
+  if (!file) return;
+  pushHistory();
+  try {
+    const material = await createCustomImageMaterial(file, $("materialRemoveBg").checked);
+    state.elements.push(material);
+    selectedLayerId = material.id;
+    renderAll();
+  } catch {
+    alert("素材画像を追加できませんでした。");
+  }
 }
 
 function deleteSelectedItem() {
@@ -1735,6 +1953,7 @@ function incrementExportCounter() {
 
 function saveProject(asNew) {
   state.name = $("projectName").value.trim() || "名称未設定";
+  persistCurrentTemplateEdit();
   const projects = readProjects();
   const copy = JSON.parse(JSON.stringify(state));
   if (!asNew && selectedProjectId) {
@@ -1774,6 +1993,22 @@ function deleteProject() {
   writeProjects(readProjects().filter((item) => item.id !== selectedProjectId));
   selectedProjectId = "";
   renderAll();
+}
+
+async function copySelectedProjectData() {
+  if (!selectedProjectId) {
+    alert("コピーする保存データを選択してください。");
+    return;
+  }
+  const project = readProjects().find((item) => item.id === selectedProjectId);
+  if (!project) return;
+  const text = JSON.stringify(project, null, 2);
+  try {
+    await navigator.clipboard.writeText(text);
+    alert("保存データをコピーしました。");
+  } catch {
+    window.prompt("この内容をコピーして送ってください。", text);
+  }
 }
 
 async function exportData() {
@@ -1855,11 +2090,17 @@ function bindEvents() {
   $("addOrFragranceBtn").addEventListener("click", () => addImageMaterial("or"));
   $("addQuFragranceBtn").addEventListener("click", () => addImageMaterial("qu"));
   $("addMintMaterialBtn").addEventListener("click", () => addImageMaterial("mint"));
+  $("materialInput").addEventListener("change", (event) => {
+    const file = event.target.files[0];
+    if (file) addCustomImageMaterial(file);
+    event.target.value = "";
+  });
   $("addTextBtn").addEventListener("click", addTextLayer);
   $("deleteSelectedBtn").addEventListener("click", deleteSelectedItem);
   $("saveNewBtn").addEventListener("click", () => saveProject(true));
   $("overwriteBtn").addEventListener("click", () => saveProject(false));
   $("deleteProjectBtn").addEventListener("click", deleteProject);
+  $("copyProjectDataBtn").addEventListener("click", copySelectedProjectData);
   $("exportDataBtn").addEventListener("click", exportData);
   $("savedSortSelect").addEventListener("change", (event) => {
     savedSortMode = event.target.value;

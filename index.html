@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>ATシールメーカー</title>
-  <link rel="stylesheet" href="./styles.css?v=24">
+  <link rel="stylesheet" href="./styles.css?v=26">
 </head>
 <body>
   <main class="app">
@@ -51,6 +51,8 @@
           <button id="addOrFragranceBtn" class="full" type="button">香り素材 OR</button>
           <button id="addQuFragranceBtn" class="full" type="button">香り素材 Q+</button>
           <button id="addMintMaterialBtn" class="full" type="button">ミント素材</button>
+          <label class="file-button full">フォルダから素材追加<input id="materialInput" type="file" accept="image/*"></label>
+          <label class="inline-check"><input id="materialRemoveBg" type="checkbox" checked> 白背景を透過</label>
           <p class="hint">今後ここに素材を追加できます。</p>
         </div>
       </aside>
@@ -76,7 +78,10 @@
             <option value="name">名前順</option>
           </select></label>
           <div id="savedList" class="saved-list"></div>
-          <button id="deleteProjectBtn" class="danger full">選択データを削除</button>
+          <div class="saved-actions">
+            <button id="copyProjectDataBtn" type="button">コピー</button>
+            <button id="deleteProjectBtn" class="danger" type="button">削除</button>
+          </div>
         </section>
 
         <section class="panel controls edit-panel" aria-label="文字編集パネル">
@@ -164,6 +169,9 @@
   </main>
 
   <script src="./asset-data.js?v=6"></script>
-  <script src="./app.js?v=56"></script>
+  <script src="./or-template-data.js?v=1"></script>
+  <script src="./qplus-template-data.js?v=3"></script>
+  <script src="./wh-template-data.js?v=1"></script>
+  <script src="./app.js?v=68"></script>
 </body>
 </html>

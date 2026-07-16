@@ -68,6 +68,15 @@ button.full {
   width: 100%;
 }
 
+.inline-check {
+  min-height: 30px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
 .file-button input {
   position: absolute;
   inline-size: 1px;
@@ -218,8 +227,8 @@ h2 { font-size: 17px; }
 }
 
 .side-stack .saved-panel {
-  min-height: 220px;
-  max-height: 220px;
+  min-height: 300px;
+  max-height: 300px;
 }
 
 .text-input-panel {
@@ -519,6 +528,7 @@ input[type="range"] {
 
 .saved-list {
   flex: 1;
+  min-height: 132px;
   overflow: auto;
 }
 
@@ -528,6 +538,13 @@ input[type="range"] {
   margin-bottom: 10px;
   color: var(--muted);
   font-size: 12px;
+}
+
+.saved-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 8px;
 }
 
 .canvas-area {
