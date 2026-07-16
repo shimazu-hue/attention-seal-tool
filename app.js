@@ -3,7 +3,7 @@ const $ = (id) => document.getElementById(id);
 const STORE_KEY = "attentionSealTemplateProjects.v1";
 const EXPORT_COUNT_KEY = "attentionSealExportCount.v1";
 const SAVED_SORT_KEY = "attentionSealSavedSort.v1";
-const TEMPLATE_PRESET_VERSION = "or-qplus-wh-templates-20260716-1";
+const TEMPLATE_PRESET_VERSION = "or-qplus-wh-vertical-templates-20260716-2";
 const EDITOR_CANVAS_PADDING = 90;
 const EDITOR_STAGE_SIZE = 720;
 const MEDAL_IMAGE = "./assets/medal-base.png";
@@ -904,16 +904,18 @@ function textMarkup(layer, extraAttributes = "") {
     return `<g data-layer-id="${layer.id}" ${extraAttributes} filter="${filter}" ${clip} style="cursor:pointer">
       ${columns.map((line, columnIndex) => {
         const chars = Array.from(line);
-        const markup = `
-        <text x="${startX - columnIndex * columnGap}" y="${startY}" text-anchor="middle"
-          writing-mode="vertical-rl" glyph-orientation-vertical="0"
-          dominant-baseline="text-before-edge"
-          font-family="${escapeXml(layer.fontFamily)}" font-size="${fontSize}"
-          font-weight="${layer.fontWeight}" letter-spacing="${letterSpacing}"
-          fill="${layer.color}">${chars.map((char, charIndex) => {
-            const style = styleAt(layer, globalIndex + charIndex, fontSize);
-            return `<tspan fill="${style.color}" font-size="${style.fontSize}">${escapeXml(char)}</tspan>`;
-          }).join("")}</text>`;
+        let y = startY;
+        const x = startX - columnIndex * columnGap;
+        const markup = chars.map((char, charIndex) => {
+          const style = styleAt(layer, globalIndex + charIndex, fontSize);
+          const charMarkup = `<text x="${x}" y="${y}" text-anchor="middle"
+            dominant-baseline="text-before-edge"
+            font-family="${escapeXml(layer.fontFamily)}" font-size="${style.fontSize}"
+            font-weight="${layer.fontWeight}" letter-spacing="${letterSpacing}"
+            fill="${style.color}">${escapeXml(char)}</text>`;
+          y += style.fontSize + letterSpacing;
+          return charMarkup;
+        }).join("");
         globalIndex += chars.length + 1;
         return markup;
       }).join("")}
@@ -1092,14 +1094,12 @@ async function stickerSvgCanvas() {
 }
 
 async function stickerPngDataUrl() {
-  try {
-    const canvas = await stickerSvgCanvas();
-    return canvas.toDataURL("image/png");
-  } catch (error) {
-    console.warn("SVGからのPNG作成に失敗したため、通常描画で書き出します。", error);
-    const canvas = await renderStickerCanvas();
-    return canvas.toDataURL("image/png");
-  }
+  const canvas = await renderStickerCanvas();
+  return canvas.toDataURL("image/png");
+}
+
+async function stickerExportCanvas() {
+  return renderStickerCanvas();
 }
 
 function canvasFont(layer, fontSize) {
@@ -2056,7 +2056,7 @@ async function downloadJpg() {
   }
 
   try {
-    const sticker = await loadImage(await stickerPngDataUrl());
+    const sticker = await stickerExportCanvas();
     const template = currentTemplate();
     const stickerCanvas = canvasDimensions(template);
     const w = THUMBNAIL_WIDTH * state.canvas.scale / 100;
